@@ -4,10 +4,8 @@
 #include <cmath>
 #include <complex>
 #include <iostream>
-#include <bitset>
 #include <string>
 #include <vector>
-#include <fstream>
 #include "utils.h"
 #include <math.h>
 #include <itpp/comm/reedsolomon.h>
