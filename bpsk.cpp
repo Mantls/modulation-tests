@@ -12,14 +12,17 @@
 #include <itpp/comm/hammcode.h>
 #include <itpp/comm/error_counters.h>
 #include <itpp/stat/misc_stat.h>
+#include "libdsp/Biquad.h"
+
 
 int main()
 {
-    int TEST_AMOUNT = 2000;
-    int MAX_SNR = 36;
+    int TEST_AMOUNT = 1;
+    int MIN_SNR = 2;
+    int MAX_SNR = 12;
     int F_SAMPLING = 44100;
     double T_SAMPLE = 1.F / F_SAMPLING;
-    double carrier_freq = 19000;
+    double carrier_freq = 10000;
     double omega = 2 * M_PI * carrier_freq; // 2*pi*f
 
     std::string message_string = "Hello, World! This has been encoded using BPSK Modulation!";
@@ -52,7 +55,7 @@ int main()
     std::cout << "-----------------------------------------------------" << std::endl;
     std::cout << std::endl;
 
-    for (int SNR = 0; SNR <= MAX_SNR; SNR++)
+    for (int SNR = MIN_SNR; SNR <= MAX_SNR; SNR++)
     {
         itpp::vec bit_error_rate(TEST_AMOUNT);
         for (int k = 0; k < bit_error_rate.size(); ++k)
@@ -66,6 +69,15 @@ int main()
 
             itpp::vec noise = itpp::randn(signal.size());
             signal = signal + noise / itpp::inv_dB(SNR);
+            Biquad *bp_filter = new Biquad(bq_type_bandpass,10000/441000,10,1);
+
+            for (int i=0; i<signal.size();++i)
+            {
+                signal[i] = bp_filter->process(signal[i]);
+                std::cout << signal[i];
+            }
+            std::cout << std::endl;
+
             for (int i = 0; i < signal.size(); ++i)
             {
                 signal[i] /= cosine_vec[i];
