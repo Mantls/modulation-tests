@@ -12,6 +12,7 @@
 #include <itpp/comm/hammcode.h>
 #include <itpp/comm/error_counters.h>
 #include <itpp/stat/misc_stat.h>
+#include <itpp/itcomm.h>
 #include "libdsp/Biquad.h"
 #include "bpsk.hpp"
 
@@ -36,11 +37,22 @@ int main()
 
 
     BPSK mymodulator(carrier_freq, F_SAMPLING);
-    auto test = mymodulator.send(bitvec);
+    auto trasnmitted_signal = mymodulator.send(bitvec);
 
-    std::cout << test << std::endl;
-    exit(0);
+    std::cout << trasnmitted_signal << std::endl;
 
+    itpp::AWGN_Channel channel;
+    
+
+    for (int SNR=1; SNR<20; ++SNR)
+    {  
+        auto SNR_dB = itpp::inv_dB(SNR); 
+        channel.set_noise(sqrt(SNR / 2)); // TODO: calculate SNR properly
+        auto noisy = channel(trasnmitted_signal);
+        auto received_date = mymodulator.receive(noisy);
+        std::cout << "SNR: " << SNR_dB << " " << binary_to_string(received_date) << std::endl;
+    }
+    
 
     itpp::BERC berc; // Bit error counter
     itpp::RNG_randomize();
