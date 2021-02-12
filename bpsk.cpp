@@ -36,8 +36,7 @@ itpp::bvec BPSK::receive(itpp::vec &signal)
 {
     for (double i = 0; i < signal.size(); ++i)
     {   
-        auto temp = signal[i] * std::sin(i * this->time_per_sample * 2 * M_PI * this->carrier_freq);
-        if (temp < 0)
+        if (signal[i] * std::sin(i * this->time_per_sample * 2 * M_PI * this->carrier_freq) < 0)
         {
             signal[i] = -1;
         } else {

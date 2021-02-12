@@ -28,93 +28,35 @@ int main()
 
     std::string message_string = "Hello, World! This has been encoded using BPSK Modulation!";
     auto message_bitvec = string_to_binary_vec(message_string);
-
     itpp::bvec bitvec(message_bitvec.size());
     for (int i = 0; i < bitvec.size(); ++i)
-    {
         bitvec[i] = message_bitvec[i];
-    }
 
 
-    BPSK mymodulator(carrier_freq, F_SAMPLING);
-    auto trasnmitted_signal = mymodulator.send(bitvec);
+    BPSK bpsk(carrier_freq, F_SAMPLING);
+    auto trasnmitted_signal = bpsk.send(bitvec);
 
     std::cout << trasnmitted_signal << std::endl;
 
     itpp::AWGN_Channel channel;
-    
-
-    for (int SNR=1; SNR<20; ++SNR)
-    {  
-        auto SNR_dB = itpp::inv_dB(SNR); 
-        channel.set_noise(sqrt(SNR / 2)); // TODO: calculate SNR properly
-        auto noisy = channel(trasnmitted_signal);
-        auto received_date = mymodulator.receive(noisy);
-        std::cout << "SNR: " << SNR_dB << " " << binary_to_string(received_date) << std::endl;
-    }
-    
-
     itpp::BERC berc; // Bit error counter
     itpp::RNG_randomize();
     itpp::Stat statistics;
-    itpp::BPSK bpsk;
-    // itpp::Reed_Solomon fec(5,3);
-    itpp::Hamming_Code fec(2); // Binary Hamming-Code for Forward Error Correction
 
-    auto encoded = fec.encode(bitvec);
-    auto modulated = bpsk.modulate_bits(encoded); // Modulated Signal
 
-    itpp::vec input_vec(modulated.size());
-    for (double i = 0; i < input_vec.size(); ++i)
+    for (double SNR=0; SNR<30;++SNR)
     {
-        input_vec[i] = i * T_SAMPLE * omega;
-    }
-    itpp::vec cosine_vec = itpp::cos(input_vec);
-
-    std::cout << "Performing Tests. " << TEST_AMOUNT << " iterations for Each SNR Value." << std::endl;
-    std::cout << "-----------------------------------------------------" << std::endl;
-    std::cout << std::endl;
-
-    for (int SNR = MIN_SNR; SNR <= MAX_SNR; SNR++)
-    {
-        itpp::vec bit_error_rate(TEST_AMOUNT);
-        for (int k = 0; k < bit_error_rate.size(); ++k)
+        channel.set_noise( 1.0/pow(10,(SNR / 10.0)) );
+        std::vector<double> erc_vec(100);
+        for (int i=0;i<erc_vec.size();++i)
         {
-            auto signal = cosine_vec;
-
-            for (int i = 0; i < modulated.size(); ++i)
-            {
-                signal[i] *= modulated[i]; // A(t)*cos(2*PI*f*t)
-            }
-
-            itpp::vec noise = itpp::randn(signal.size());
-            signal = signal + noise / itpp::inv_dB(SNR);
-            Biquad *bp_filter = new Biquad(bq_type_bandpass,
-                                            ((carrier_freq)/ F_SAMPLING), 
-                                            0.7, 
-                                            1.0);
-            // bp_filter->setBiquad(bq_type_bandpass,10000.0 / 44100.0,1.0,1.0);
-            // for (int i=0; i<signal.size();++i)
-            // {
-            //     signal[i] = bp_filter->process((float) signal[i]);
-            // }
-
-            for (int i = 0; i < signal.size(); ++i)
-            {
-                signal[i] /= cosine_vec[i];
-            }
-
-            auto demodulated = bpsk.demodulate_bits(signal);
-            auto decoded = fec.decode(demodulated);
-            bit_error_rate[k] = berc.count_errors(bitvec, decoded);
-
-            std::vector<int> result(decoded.size());
-            for (int i = 0; i < result.size(); ++i)
-            {
-                result[i] = decoded[i];
-            }
+            auto noisy = channel(trasnmitted_signal);
+            auto received = bpsk.receive(noisy);
+            erc_vec[i] = berc.count_errors(received, bitvec);
         }
-        std::cout << "SNR: " << SNR << "dB. BER: " << get_average(bit_error_rate) << std::endl;
+        std::cout << "SNR in dB: " << SNR << " BER: " << get_average(erc_vec) << std::endl;
     }
+
+
     return 1;
 }
