@@ -36,7 +36,7 @@ int main()
     BPSK bpsk(carrier_freq, F_SAMPLING);
     auto trasnmitted_signal = bpsk.send(bitvec);
 
-    std::cout << trasnmitted_signal << std::endl;
+    //std::cout << trasnmitted_signal << std::endl;
 
     itpp::AWGN_Channel channel;
     itpp::BERC berc; // Bit error counter

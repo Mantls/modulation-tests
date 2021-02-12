@@ -1,8 +1,8 @@
 #include "bpsk.hpp"
 
-BPSK::BPSK(double carrier_freq, double sampling_freq)
+BPSK::BPSK(double &carrier_freq, double &sampling_freq, double &windowing_time)
 {
-    this->set_parameters(carrier_freq, sampling_freq);
+    this->set_parameters(carrier_freq, sampling_freq, windowing_time);
 }
 
 BPSK::~BPSK()
@@ -12,12 +12,13 @@ BPSK::~BPSK()
     delete this->bandpass;
 }
 
-void BPSK::set_parameters(double &carrier_freq, double &sampling_freq)
+void BPSK::set_parameters(double &carrier_freq, double &sampling_freq, double &windowing_time)
 {
     this->carrier_freq = carrier_freq;
     this->sampling_freq = sampling_freq;
     this->time_per_sample = 1 / sampling_freq;
     this->bandpass->setBiquad(bq_type_bandpass,(this->carrier_freq)/ this->sampling_freq,0.05,1.0);
+    this->windowing_time_samples = sampling_freq * windowing_time;
 }
 
 itpp::vec BPSK::send(itpp::bvec &message)
@@ -47,3 +48,5 @@ itpp::bvec BPSK::receive(itpp::vec &signal)
     auto output = this->fec->decode(received_bits);
     return output;
 }
+
+
