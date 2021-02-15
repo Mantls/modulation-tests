@@ -33,7 +33,7 @@ int main()
         bitvec[i] = message_bitvec[i];
 
 
-    BPSK bpsk(carrier_freq, F_SAMPLING, (4/F_SAMPLING));
+    BPSK bpsk(carrier_freq, F_SAMPLING, 7);
     auto trasnmitted_signal = bpsk.send(bitvec);
 
     //std::cout << trasnmitted_signal << std::endl;

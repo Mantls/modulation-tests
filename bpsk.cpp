@@ -26,10 +26,10 @@ itpp::vec BPSK::send(itpp::bvec &message)
     auto signal = this->fec->encode(message);
     auto modulated = this->modulator->modulate_bits(signal);
     itpp::vec output(modulated.size()*this->windowing_time_samples);
-    for (double i = 0; i < modulated.size(); i+=this->windowing_time_samples)
+    for (double i = 0; i < modulated.size(); ++i)
     {   
         for (int k=0; k<this->windowing_time_samples;++k)
-            output[i+k] = modulated[i] * std::sin(i * this->time_per_sample * 2 * M_PI * this->carrier_freq);
+            output[i+k] = modulated[i] * std::sin((i+k) * this->time_per_sample * 2 * M_PI * this->carrier_freq);
     }
 
     return output;
@@ -39,21 +39,24 @@ itpp::bvec BPSK::receive(itpp::vec &signal)
 {   
     itpp::vec sampled_signal(signal.size() / this->windowing_time_samples);
     auto moving_avg = 0;
-    for (int i=0; i<sampled_signal.size();i+=this->windowing_time_samples)
+    auto count = 0;
+    for (double i=0; i<signal.size();++i)
     {
-        moving_avg = 0;
-        for (double k = 0; k<windowing_time_samples; ++k)
+        moving_avg += signal[i] * std::sin((i) * this->time_per_sample * 2 * M_PI * this->carrier_freq);
+        
+        if ((int) i % this->windowing_time_samples == 0)
         {
-            moving_avg += signal[i+k] * std::sin((i+k) * this->time_per_sample * 2 * M_PI * this->carrier_freq);
+            if (moving_avg < 0)
+            {   
+                sampled_signal[count] = -1;
+            } else {
+                sampled_signal[count] = 1;
+            }
+            ++count;
+            moving_avg = 0;
         }
-        moving_avg /= this->windowing_time_samples;
-        if (moving_avg < 0)
-        {
-            sampled_signal[i] = -1;
-        } else {
-            sampled_signal[i] = 1;
-        }
-    }
+    } 
+    
     auto received_bits = this->modulator->demodulate_bits(sampled_signal);
     auto output = this->fec->decode(received_bits);
     return output;
