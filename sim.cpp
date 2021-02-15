@@ -21,7 +21,7 @@ int main()
     int TEST_AMOUNT = 1000;
     int MIN_SNR = 2;
     int MAX_SNR = 12;
-    int F_SAMPLING = 44100;
+    double F_SAMPLING = 44100;
     double T_SAMPLE = 1.F / F_SAMPLING;
     double carrier_freq = 19000;
     double omega = 2 * M_PI * carrier_freq; // 2*pi*f
@@ -33,7 +33,7 @@ int main()
         bitvec[i] = message_bitvec[i];
 
 
-    BPSK bpsk(carrier_freq, F_SAMPLING);
+    BPSK bpsk(carrier_freq, F_SAMPLING, (4/F_SAMPLING));
     auto trasnmitted_signal = bpsk.send(bitvec);
 
     //std::cout << trasnmitted_signal << std::endl;

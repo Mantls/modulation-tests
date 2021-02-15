@@ -21,8 +21,8 @@ Biquad* bandpass = new Biquad();
 
 public:
     BPSK();
-    BPSK(double &carrier_freq, double &sampling_freq, double &windowing_time);
-    void set_parameters(double &carrier_freq, double &sampling_freq, double &windowing_time);
+    BPSK(double carrier_freq, double sampling_freq, int windowing_time);
+    void set_parameters(double &carrier_freq, double &sampling_freq, int &windowing_samples);
     itpp::vec send(itpp::bvec &signal);
     itpp::bvec receive(itpp::vec &signal);
 
