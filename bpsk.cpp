@@ -38,21 +38,21 @@ itpp::vec BPSK::send(itpp::bvec &message)
 itpp::bvec BPSK::receive(itpp::vec &signal)
 {   
     itpp::vec sampled_signal(signal.size() / this->windowing_time_samples);
-    double moving_avg = 0;
+    double estimated_window = 0;
     auto count = 0;
     for (auto i=0; i<signal.size();++i)
     {
-        moving_avg += signal[i] * std::sin(i * this->time_per_sample * 2 * M_PI * this->carrier_freq);
+        estimated_window += signal[i] * std::sin(i * this->time_per_sample * 2 * M_PI * this->carrier_freq);
         if ((int) i % this->windowing_time_samples == 0 && (i!=0 || this->windowing_time_samples==1))
         {
-            if (moving_avg < 0)
+            if (estimated_window < 0)
             {   
                 sampled_signal[count] = -1;
             } else {
                 sampled_signal[count] = 1;
             }
             ++count;
-            moving_avg = 0;
+            estimated_window = 0;
         }
     } 
     
