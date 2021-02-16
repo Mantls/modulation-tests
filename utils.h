@@ -40,7 +40,6 @@ std::string binary_to_string(std::vector<int> &vec_in) // Takes Vector of ints a
         str_out += (char)bits.to_ulong();
     }
     str_out += char(0);
-    // str_out[str_out.size()] = NULL; // We need to add the NULL-Terminator to signal EOS
 
     return str_out;
 }
@@ -63,27 +62,8 @@ std::string binary_to_string(itpp::bvec &vec_in) // Takes Vector of ints and ret
     return str_out;
 }
 
-double get_average(itpp::vec &vec_in)
-{
-    double res = 0;
-    for (auto i = 0; i < vec_in.size(); ++i)
-    {
-        res += vec_in[i];
-    }
-    return res / vec_in.size();
-}
-
-double get_average(std::vector<int> &vec_in)
-{
-    double res = 0;
-    for (auto i = 0; i < vec_in.size(); ++i)
-    {
-        res += vec_in[i];
-    }
-    return res / vec_in.size();
-}
-
-double get_average(std::vector<double> &vec_in)
+template<typename T>
+double get_average(T &vec_in)
 {
     double res = 0;
     for (auto i = 0; i < vec_in.size(); ++i)
