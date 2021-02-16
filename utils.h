@@ -27,24 +27,9 @@ std::vector<int> string_to_binary_vec(std::string &str_in)
     return vec_out;
 }
 
-std::string binary_to_string(std::vector<int> &vec_in) // Takes Vector of ints and returns a string
-{
-    std::string str_out;
-    for (int i = 0; i < vec_in.size(); i += 8)
-    {
-        std::bitset<8> bits;
-        for (int k = 0; k < bits.size(); ++k)
-        {
-            bits[7 - k] = vec_in[i + k]; // due to endianness??
-        }
-        str_out += (char)bits.to_ulong();
-    }
-    str_out += char(0);
 
-    return str_out;
-}
-
-std::string binary_to_string(itpp::bvec &vec_in) // Takes Vector of ints and returns a string
+template<typename T>
+std::string binary_to_string(T &vec_in) // Takes Vector of ints and returns a string
 {
     std::string str_out;
     for (int i = 0; i < vec_in.size(); i += 8)
@@ -56,11 +41,11 @@ std::string binary_to_string(itpp::bvec &vec_in) // Takes Vector of ints and ret
         }
         str_out += (char)bits.to_ulong();
     }
-    //str_out += char(0);
-    // str_out[str_out.size()] = NULL; // We need to add the NULL-Terminator to signal EOS
+    str_out += char(0);
 
     return str_out;
 }
+
 
 template<typename T>
 double get_average(T &vec_in)
