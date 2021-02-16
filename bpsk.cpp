@@ -29,7 +29,7 @@ itpp::vec BPSK::send(itpp::bvec &message)
     for (double i = 0; i < modulated.size(); ++i)
     {   
         for (int k=0; k<this->windowing_time_samples;++k)
-            output[i+k] = modulated[i] * std::sin((i+k) * this->time_per_sample * 2 * M_PI * this->carrier_freq);
+            output[(i * this->windowing_time_samples)+k] = modulated[i] * std::sin(((i * this->windowing_time_samples)+k) * this->time_per_sample * 2 * M_PI * this->carrier_freq);
     }
 
     return output;
@@ -38,13 +38,12 @@ itpp::vec BPSK::send(itpp::bvec &message)
 itpp::bvec BPSK::receive(itpp::vec &signal)
 {   
     itpp::vec sampled_signal(signal.size() / this->windowing_time_samples);
-    auto moving_avg = 0;
+    double moving_avg = 0;
     auto count = 0;
-    for (double i=0; i<signal.size();++i)
+    for (auto i=0; i<signal.size();++i)
     {
-        moving_avg += signal[i] * std::sin((i) * this->time_per_sample * 2 * M_PI * this->carrier_freq);
-        
-        if ((int) i % this->windowing_time_samples == 0)
+        moving_avg += signal[i] * std::sin(i * this->time_per_sample * 2 * M_PI * this->carrier_freq);
+        if ((int) i % this->windowing_time_samples == 0 && i!=0)
         {
             if (moving_avg < 0)
             {   
