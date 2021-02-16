@@ -33,15 +33,16 @@ int main()
         bitvec[i] = message_bitvec[i];
 
 
-    BPSK bpsk(carrier_freq, F_SAMPLING, 7);
+    BPSK bpsk(carrier_freq, F_SAMPLING, 12);
     auto trasnmitted_signal = bpsk.send(bitvec);
-
     //std::cout << trasnmitted_signal << std::endl;
 
     itpp::AWGN_Channel channel;
     itpp::BERC berc; // Bit error counter
     itpp::RNG_randomize();
     itpp::Stat statistics;
+
+
 
 
     for (double SNR=0; SNR<30;++SNR)
