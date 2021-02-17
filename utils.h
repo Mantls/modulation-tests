@@ -55,5 +55,5 @@ double get_average(T &vec_in)
     {
         res += vec_in[i];
     }
-    return res / vec_in.size();
+    return (res / vec_in.size());
 }
