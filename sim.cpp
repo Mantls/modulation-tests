@@ -4,6 +4,7 @@
 #include <cmath>
 #include <complex>
 #include <iostream>
+#include <iomanip>
 #include <string>
 #include <vector>
 #include "utils.h"
@@ -27,6 +28,8 @@ int main()
     double T_SAMPLE = 1.F / F_SAMPLING;
     double carrier_freq = 19000;
     double omega = 2 * M_PI * carrier_freq; // 2*pi*f
+
+
 
     std::string message_string = "Hello, World! This has been encoded using BPSK Modulation!";
     auto message_bitvec = string_to_binary_vec(message_string);
@@ -72,7 +75,7 @@ int main()
             auto received = bpsk.receive(noisy);
             erc_vec[i] = berc.count_errors(received, bitvec);
         }
-        std::cout << "SNR in dB: " << SNR << " BER: " << get_average(erc_vec) << std::endl;
+        std::cout << "SNR in dB: " << SNR << " BER: " << std::setprecision(15) << get_average(erc_vec) << std::endl;
     }
     return 1;
 }
