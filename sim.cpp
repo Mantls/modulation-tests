@@ -15,6 +15,8 @@
 #include <itpp/itcomm.h>
 #include "libdsp/Biquad.h"
 #include "bpsk.hpp"
+#include "qpsk.hpp"
+#include "AudioFile.h"
 
 int main()
 {
@@ -31,33 +33,46 @@ int main()
     itpp::bvec bitvec(message_bitvec.size());
     for (int i = 0; i < bitvec.size(); ++i)
         bitvec[i] = message_bitvec[i];
-
-
-    BPSK bpsk(carrier_freq, F_SAMPLING, 12);
-    auto trasnmitted_signal = bpsk.send(bitvec);
-    //std::cout << trasnmitted_signal << std::endl;
+    
+    QPSK bpsk(carrier_freq, F_SAMPLING, 12);
+    auto transmitted_signal = bpsk.send(bitvec);
+    //std::cout << transmitted_signal << std::endl;
 
     itpp::AWGN_Channel channel;
     itpp::BERC berc; // Bit error counter
     itpp::RNG_randomize();
     itpp::Stat statistics;
+    AudioFile<double> audioFile;
 
 
+    audioFile.setSampleRate(F_SAMPLING);
+    audioFile.setBitDepth(16);
+    audioFile.setNumChannels(1);
+    audioFile.setNumSamplesPerChannel(transmitted_signal.size());
+
+    for (int i = 0; i < audioFile.getNumSamplesPerChannel(); i++)
+    {
+        for (int channel = 0; channel < audioFile.getNumChannels(); channel++)
+        {
+            audioFile.samples[channel][i] = transmitted_signal[i];
+        }
+    }
 
 
-    for (double SNR=0; SNR<30;++SNR)
+    audioFile.save("test-wav.wav",AudioFileFormat::Wave);
+
+
+    for (double SNR=0; SNR<20;++SNR)
     {
         channel.set_noise( 1.0/pow(10,(SNR / 10.0)) );
-        std::vector<double> erc_vec(100);
+        std::vector<double> erc_vec(500);
         for (int i=0;i<erc_vec.size();++i)
         {
-            auto noisy = channel(trasnmitted_signal);
+            auto noisy = channel(transmitted_signal);
             auto received = bpsk.receive(noisy);
             erc_vec[i] = berc.count_errors(received, bitvec);
         }
         std::cout << "SNR in dB: " << SNR << " BER: " << get_average(erc_vec) << std::endl;
     }
-
-
     return 1;
 }
