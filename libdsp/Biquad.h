@@ -39,7 +39,8 @@ public:
     void setFc(double Fc);
     void setPeakGain(double peakGainDB);
     void setBiquad(int type, double Fc, double Q, double peakGainDB);
-    float process(float in);
+    template <typename T>
+    double process(T in);
     
 protected:
     void calcBiquad(void);
@@ -50,7 +51,8 @@ protected:
     double z1, z2;
 };
 
-inline float Biquad::process(float in) {
+template <typename T>
+double Biquad::process(T in) {
     double out = in * a0 + z1;
     z1 = in * a1 + z2 - b1 * out;
     z2 = in * a2 - b2 * out;
