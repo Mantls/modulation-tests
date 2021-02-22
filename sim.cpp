@@ -17,6 +17,7 @@
 #include "libdsp/Biquad.h"
 #include "bpsk.hpp"
 #include "qpsk.hpp"
+#include "qam16.hpp"
 #include "AudioFile.h"
 
 int main()
@@ -24,8 +25,8 @@ int main()
     int TEST_AMOUNT = 1000;
     int MIN_SNR = 2;
     int MAX_SNR = 12;
-    double F_SAMPLING = 44100;
-    double T_SAMPLE = 1.F / F_SAMPLING;
+    static double F_SAMPLING = 44100;
+    static double T_SAMPLE = 1.F / F_SAMPLING;
     double carrier_freq = 19000;
     double omega = 2 * M_PI * carrier_freq; // 2*pi*f
 
@@ -37,7 +38,7 @@ int main()
     for (int i = 0; i < bitvec.size(); ++i)
         bitvec[i] = message_bitvec[i];
     
-    QPSK bpsk(carrier_freq, F_SAMPLING, 12);
+    QAM16 bpsk(carrier_freq, F_SAMPLING, 20);
     auto transmitted_signal = bpsk.send(bitvec);
     //std::cout << transmitted_signal << std::endl;
 
@@ -65,7 +66,7 @@ int main()
     audioFile.save("test-wav.wav",AudioFileFormat::Wave);
 
 
-    for (double SNR=0; SNR<20;++SNR)
+    for (double SNR=2; SNR<20;++SNR)
     {
         channel.set_noise( 1.0/pow(10,(SNR / 10.0)) );
         std::vector<double> erc_vec(500);
