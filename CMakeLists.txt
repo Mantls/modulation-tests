@@ -10,7 +10,7 @@ add_library(
     ${CMAKE_CURRENT_SOURCE_DIR}/libdsp/Biquad.cpp
 
 )
-find_library(itpp_lib itpp)
+find_library(ITPP_LIB itpp)
 
 
 
@@ -18,7 +18,8 @@ add_executable(
     modulation-test
     bpsk.cpp
     qpsk.cpp
+    qam16.cpp
     sim.cpp
 )
 
-target_link_libraries(modulation-test PRIVATE "${itpp_lib}" libdsp)
+target_link_libraries(modulation-test PRIVATE "${ITPP_LIB}" libdsp)
