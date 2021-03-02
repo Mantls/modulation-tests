@@ -57,7 +57,7 @@ itpp::bvec QAM16::receive(itpp::vec &signal)
 
         if ((int)k % this->windowing_time_samples == 0 && (k != 0 || this->windowing_time_samples == 1) || (k == signal.size() - 1))
         {   
-            using namespace std::complex_literals;
+            using namespace std::complex_literals; // to access the complex number...
             estimated_window_imag /= windowing_time_samples;
             estimated_window_real /= windowing_time_samples;
             real = estimated_window_real + 0i;
